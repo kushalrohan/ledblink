@@ -1,0 +1,58 @@
+<html>
+<head>
+  <title>ESP8266 LED Control</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+    #status { font-size: 18px; margin-top: 20px; padding: 10px; 
+              background-color: #f0f0f0; border-radius: 5px; 
+              display: inline-block; min-width: 200px; }
+  </style>
+</head>
+<body>
+  <h1>ESP8266 LED Control</h1>
+  <button id="toggleBtn">Toggle LED</button>
+  <button id="blinkBtn">Start Blinking</button>
+  <div id="status">LED is OFF</div>
+  <div id="wsStatus">WebSocket: Connecting...</div>
+  
+  <script>
+    const espIp = "192.168.137.242";
+    const socket = new WebSocket('ws://' + "192.168.137.242" + ':81/');
+    
+    socket.onopen = function(e) {
+      document.getElementById('wsStatus').innerHTML = 'WebSocket: Connected';
+      console.log('WebSocket connected');
+    };
+    
+    socket.onmessage = function(event) {
+      document.getElementById('status').innerHTML = event.data;
+      console.log('Message from server:', event.data);
+    };
+    
+    socket.onerror = function(error) {
+      document.getElementById('wsStatus').innerHTML = 'WebSocket: Error';
+      console.log('WebSocket error:', error);
+    };
+    
+    socket.onclose = function(event) {
+      document.getElementById('wsStatus').innerHTML = 'WebSocket: Disconnected';
+      if (event.reason) {
+        console.log('WebSocket closed:', event.reason);
+      } else {
+        console.log('WebSocket closed');
+      }
+    };
+    
+    document.getElementById('toggleBtn').addEventListener('click', function() {
+      console.log('Sending: toggle');
+      socket.send('toggle');
+    });
+    
+    document.getElementById('blinkBtn').addEventListener('click', function() {
+      console.log('Sending: blink');
+      socket.send('blink');
+    });
+  </script>
+</body>
+</html>
